@@ -138,7 +138,7 @@ public class MyOrderActivity extends AppCompatActivity {
 
         compositeDisposable.clear();
 
-        compositeDisposable.add(apiShopee.showOrder(Utils.UserCurent.getId())
+        compositeDisposable.add(apiShopee.showOrder(Utils.UserCurent.getId(), typeOrder)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -148,6 +148,7 @@ public class MyOrderActivity extends AppCompatActivity {
                                 rcv_myorder.setAdapter(adapter);
                             }
                             else {
+                                rcv_myorder.setAdapter(null);
                                 txt_emptyOrder.setVisibility(View.VISIBLE);
                             }
                         },

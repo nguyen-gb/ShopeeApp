@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.shopee.R;
+import com.example.shopee.activity.MyOrderActivity;
 import com.example.shopee.activity.UserActivity;
 import com.example.shopee.model.EventBus.CalTotalEvent;
 import com.example.shopee.model.Order;
@@ -26,6 +27,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -94,6 +96,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
                     builder.setPositiveButton("Đồng ý", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
+                            int idRemove = order.getId();
                             compositeDisposable.add(apiShopee.deleteOrder(order.getId())
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
@@ -110,6 +113,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
                                                 Toast.makeText(view.getContext(), throwable.getMessage(), Toast.LENGTH_LONG).show();
                                             }
                                     ));
+                            Intent myOrderIntent = new Intent(context, MyOrderActivity.class);
+                            myOrderIntent.putExtra("typeOrder", 1);
+                            myOrderIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(myOrderIntent);
                         }
                     });
                     builder.show();
@@ -120,6 +127,47 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.MyViewHolder
         else if (typeOrder == 2) {
             holder.btn_order.setText("Đã nhận");
             holder.txt_line.setVisibility(View.VISIBLE);
+
+            holder.btn_order.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
+                    //builder.setTitle("Thông báo");
+                    builder.setMessage("Bạn đã nhận được đơn hàng?");
+                    builder.setNegativeButton("Không", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    builder.setPositiveButton("Đồng ý", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            compositeDisposable.add(apiShopee.receivedOrder(order.getId())
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(
+                                            userModel -> {
+                                                if(userModel.isSuccess()) {
+                                                    Toast.makeText(view.getContext(), "Xác nhận đã nhận đơn hàng", Toast.LENGTH_LONG).show();
+                                                }
+                                                else {
+                                                    Toast.makeText(view.getContext(), userModel.getMessage(), Toast.LENGTH_LONG).show();
+                                                }
+                                            },
+                                            throwable -> {
+                                                Toast.makeText(view.getContext(), throwable.getMessage(), Toast.LENGTH_LONG).show();
+                                            }
+                                    ));
+                            Intent myOrderIntent = new Intent(context, MyOrderActivity.class);
+                            myOrderIntent.putExtra("typeOrder", 2);
+                            myOrderIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(myOrderIntent);
+                        }
+                    });
+                    builder.show();
+                }
+            });
         }
         else {
             holder.btn_order.setWidth(0);

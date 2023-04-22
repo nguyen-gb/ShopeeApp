@@ -63,7 +63,8 @@ public interface ApiShopee {
     @POST("showOrder.php")
     @FormUrlEncoded
     Observable<OrderModel> showOrder(
-            @Field("idUser") int idUser
+            @Field("idUser") int idUser,
+            @Field("state") int state
     );
 
     @POST("search.php")
@@ -91,6 +92,12 @@ public interface ApiShopee {
     @POST("deleteOrder.php")
     @FormUrlEncoded
     Observable<UserModel> deleteOrder(
+            @Field("idOrder") int idOrder
+    );
+
+    @POST("receivedOrder.php")
+    @FormUrlEncoded
+    Observable<UserModel> receivedOrder(
             @Field("idOrder") int idOrder
     );
 }
